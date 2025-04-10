@@ -1,13 +1,11 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from PIL import Image
 import io
-import cv2
 
 # Set page config
 st.set_page_config(
@@ -206,74 +204,91 @@ def show_model_comparison():
 def show_clinical_interpretability():
     st.header("Clinical Interpretability and Model Explainability")
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.subheader("Model Focus Areas (Grad-CAM)")
-        st.write("Gradient-weighted Class Activation Mapping highlights regions that most influenced the model's prediction.")
-        
-        # Create sample Grad-CAM visualizations
-        fig, axes = plt.subplots(1, 2, figsize=(10, 5))
-        
-        # Create a simulated chest X-ray with pneumonia
-        x = np.linspace(-10, 10, 200)
-        y = np.linspace(-10, 10, 200)
-        X, Y = np.meshgrid(x, y)
-        Z = np.exp(-(X**2 + Y**2) / 20)
-        
-        # Plot "Normal" X-ray
-        axes[0].imshow(Z, cmap='gray')
-        axes[0].set_title('Normal X-ray')
-        axes[0].axis('off')
-        
-        # Plot "Pneumonia" X-ray with Grad-CAM overlay
-        # Create a heatmap
-        heatmap = np.zeros_like(Z)
-        heatmap[70:130, 90:150] = 1
-        heatmap = cv2.GaussianBlur(heatmap, (15, 15), 0)
-        
-        pneumonia_img = Z * 0.8  # Slightly darker
-        axes[1].imshow(pneumonia_img, cmap='gray')
-        axes[1].imshow(heatmap, cmap='jet', alpha=0.5)
-        axes[1].set_title('Pneumonia X-ray with Grad-CAM')
-        axes[1].axis('off')
-        
-        plt.tight_layout()
-        st.pyplot(fig)
-        
-        st.write("""
-        In pneumonia cases, the model correctly focuses on areas of consolidation and infiltrates, 
-        while normal cases show minimal focused activation.
-        """)
+        st.subheader("Normal Case")
+        # Create a placeholder for the image
+        st.markdown("""
+        <div style="background-color: #f0f0f0; height: 250px; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 10px;">
+            <div>
+                <p style="font-weight: bold;">Normal X-ray</p>
+                <p>No significant abnormalities</p>
+                <p style="background-color: rgba(0,0,0,0.6); color: white; padding: 5px 10px; border-radius: 5px; margin-top: 10px;">
+                    Prediction: 92% Normal
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("Clinical Threshold Analysis")
-        
-        # Convert roc_data to DataFrame
-        roc_df = pd.DataFrame(roc_data)
-        
-        # Create line chart showing sensitivity and specificity trade-off
-        fig = px.line(
-            roc_df, 
-            x='threshold', 
-            y=['sensitivity', 'specificity'],
-            labels={
-                'threshold': 'Decision Threshold',
-                'value': 'Metric Value',
-                'variable': 'Metric'
-            },
-            title='Sensitivity and Specificity at Different Thresholds'
-        )
-        fig.update_layout(yaxis_range=[0.3, 1.0], yaxis_tickformat='.0%')
-        
-        st.plotly_chart(fig, use_container_width=True)
-        
-        st.write("""
-        **Optimal Clinical Thresholds:**
-        - **Screening (0.3)**: 96% sensitivity, 58% specificity
-        - **Balanced (0.5)**: 91% sensitivity, 77% specificity
-        - **Confirmatory (0.7)**: 82% sensitivity, 88% specificity
-        """)
+        st.subheader("Pneumonia Case #1")
+        # Create a placeholder with some styling for pneumonia case 1
+        st.markdown("""
+        <div style="background-color: #f0f0f0; height: 250px; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 10px; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: radial-gradient(circle at bottom right, rgba(255,0,0,0.3), transparent); border-radius: 10px;"></div>
+            <div style="z-index: 2;">
+                <p style="font-weight: bold;">Right Lower Lobe Pneumonia</p>
+                <p>Focal consolidation visible</p>
+                <p style="background-color: rgba(0,0,0,0.6); color: white; padding: 5px 10px; border-radius: 5px; margin-top: 10px;">
+                    Prediction: 95% Pneumonia
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.subheader("Pneumonia Case #2")
+        # Create a placeholder with some styling for pneumonia case 2
+        st.markdown("""
+        <div style="background-color: #f0f0f0; height: 250px; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 10px; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: radial-gradient(circle at center left, rgba(255,0,0,0.3), transparent); border-radius: 10px;"></div>
+            <div style="z-index: 2;">
+                <p style="font-weight: bold;">Left Middle Lobe Pneumonia</p>
+                <p>Diffuse infiltrates visible</p>
+                <p style="background-color: rgba(0,0,0,0.6); color: white; padding: 5px 10px; border-radius: 5px; margin-top: 10px;">
+                    Prediction: 88% Pneumonia
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div style="background-color: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 5px; margin-top: 20px; border: 1px solid rgba(59, 130, 246, 0.2);">
+        <p style="margin: 0; color: #1e40af; font-size: 14px;">
+            <strong>Grad-CAM Analysis:</strong> Gradient-weighted Class Activation Mapping highlights regions that most influenced the model's prediction, providing visual explanations for decisions. In pneumonia cases, the model correctly focuses on areas of consolidation and infiltrates, while normal cases show minimal focused activation.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Clinical Threshold Analysis
+    st.subheader("Clinical Threshold Analysis")
+    
+    # Convert roc_data to DataFrame
+    roc_df = pd.DataFrame(roc_data)
+    
+    # Create line chart showing sensitivity and specificity trade-off
+    fig = px.line(
+        roc_df, 
+        x='threshold', 
+        y=['sensitivity', 'specificity'],
+        labels={
+            'threshold': 'Decision Threshold',
+            'value': 'Metric Value',
+            'variable': 'Metric'
+        },
+        title='Sensitivity and Specificity at Different Thresholds'
+    )
+    fig.update_layout(yaxis_range=[0.3, 1.0], yaxis_tickformat='.0%')
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
+    st.write("""
+    **Optimal Clinical Thresholds:**
+    - **Screening (0.3)**: 96% sensitivity, 58% specificity
+    - **Balanced (0.5)**: 91% sensitivity, 77% specificity
+    - **Confirmatory (0.7)**: 82% sensitivity, 88% specificity
+    """)
     
     # Risk stratification visualization
     st.subheader("Risk Stratification by Model Score")
@@ -429,15 +444,18 @@ def show_example_predictions():
         tab1, tab2, tab3 = st.tabs(["Normal X-ray", "Bacterial Pneumonia", "Viral Pneumonia"])
         
         with tab1:
-            # Create a simulated normal X-ray
-            fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-            x = np.linspace(-10, 10, 200)
-            y = np.linspace(-10, 10, 200)
-            X, Y = np.meshgrid(x, y)
-            Z = np.exp(-(X**2 + Y**2) / 20)
-            ax.imshow(Z, cmap='gray')
-            ax.axis('off')
-            st.pyplot(fig)
+            # Create a placeholder for normal X-ray
+            st.markdown("""
+            <div style="background-color: #f0f0f0; height: 300px; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 10px;">
+                <div>
+                    <p style="font-weight: bold; font-size: 18px;">Normal Chest X-ray</p>
+                    <p>Clear lung fields with no infiltrates or consolidations</p>
+                    <p style="background-color: rgba(0,0,0,0.6); color: white; padding: 5px 10px; border-radius: 5px; margin-top: 10px;">
+                        Prediction: 92% Normal
+                    </p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
             st.markdown("""
             **Prediction: Normal (92% confidence)**
@@ -446,32 +464,19 @@ def show_example_predictions():
             """)
         
         with tab2:
-            # Create a simulated pneumonia X-ray (bacterial)
-            fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-            
-            # Base image
-            x = np.linspace(-10, 10, 200)
-            y = np.linspace(-10, 10, 200)
-            X, Y = np.meshgrid(x, y)
-            Z = np.exp(-(X**2 + Y**2) / 20) * 0.8  # Slightly darker
-            
-            # Add pneumonia-like opacity
-            pneumonia_mask = np.zeros_like(Z)
-            pneumonia_mask[70:130, 90:150] = 1
-            pneumonia_mask = cv2.GaussianBlur(pneumonia_mask, (15, 15), 0)
-            
-            # Composite image
-            img = Z - pneumonia_mask * 0.3
-            
-            # Display image
-            ax.imshow(img, cmap='gray')
-            
-            # Display heatmap
-            heatmap = pneumonia_mask
-            ax.imshow(heatmap, cmap='hot', alpha=0.4)
-            
-            ax.axis('off')
-            st.pyplot(fig)
+            # Create a placeholder for bacterial pneumonia
+            st.markdown("""
+            <div style="background-color: #f0f0f0; height: 300px; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 10px; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: radial-gradient(circle at bottom right, rgba(255,0,0,0.3), transparent); border-radius: 10px;"></div>
+                <div style="z-index: 2;">
+                    <p style="font-weight: bold; font-size: 18px;">Bacterial Pneumonia</p>
+                    <p>Focal consolidation in right lower lobe</p>
+                    <p style="background-color: rgba(0,0,0,0.6); color: white; padding: 5px 10px; border-radius: 5px; margin-top: 10px;">
+                        Prediction: 95% Pneumonia
+                    </p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
             st.markdown("""
             **Prediction: Pneumonia (95% confidence)**
@@ -481,37 +486,19 @@ def show_example_predictions():
             """)
         
         with tab3:
-            # Create a simulated pneumonia X-ray (viral)
-            fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-            
-            # Base image
-            x = np.linspace(-10, 10, 200)
-            y = np.linspace(-10, 10, 200)
-            X, Y = np.meshgrid(x, y)
-            Z = np.exp(-(X**2 + Y**2) / 20) * 0.85
-            
-            # Add viral pneumonia-like diffuse pattern
-            viral_pattern = np.zeros_like(Z)
-            for i in range(5):
-                cx, cy = np.random.randint(50, 150, 2)
-                size = np.random.randint(10, 40)
-                mask = np.zeros_like(Z)
-                mask[cx-size//2:cx+size//2, cy-size//2:cy+size//2] = 1
-                mask = cv2.GaussianBlur(mask, (15, 15), 0)
-                viral_pattern += mask * 0.15
-            
-            # Composite image
-            img = Z - viral_pattern
-            
-            # Display image
-            ax.imshow(img, cmap='gray')
-            
-            # Display heatmap
-            viral_pattern_normalized = viral_pattern / viral_pattern.max()
-            ax.imshow(viral_pattern_normalized, cmap='plasma', alpha=0.4)
-            
-            ax.axis('off')
-            st.pyplot(fig)
+            # Create a placeholder for viral pneumonia
+            st.markdown("""
+            <div style="background-color: #f0f0f0; height: 300px; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 10px; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: linear-gradient(135deg, rgba(255,0,0,0.1) 0%, rgba(255,0,0,0.3) 50%, rgba(255,0,0,0.1) 100%); border-radius: 10px;"></div>
+                <div style="z-index: 2;">
+                    <p style="font-weight: bold; font-size: 18px;">Viral Pneumonia</p>
+                    <p>Diffuse interstitial pattern</p>
+                    <p style="background-color: rgba(0,0,0,0.6); color: white; padding: 5px 10px; border-radius: 5px; margin-top: 10px;">
+                        Prediction: 89% Pneumonia
+                    </p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
             st.markdown("""
             **Prediction: Pneumonia (89% confidence)**
